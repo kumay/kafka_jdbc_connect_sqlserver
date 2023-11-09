@@ -33,7 +33,7 @@ $ docker build . -f connect.Dockerfile -t "connect:0.1.0"
 docker-composeではconnect:0.1.0と記載しているためここではタグをconnect:0.1.0としている。
 
 
-*利用している driverのリンク*
+**利用している driverのリンク**
 
 https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.22/mysql-connector-java-8.0.22.jar
 
@@ -45,15 +45,18 @@ https://github.com/microsoft/mssql-jdbc/releases
 
 ### JDBC connectors　作成用JSONファイル
 
-*Source connector*
+**Source connector**
+
 mssql_source_connector.json
 
 
-*sink connector*
+**sink connector**
+
 mssql_sink_connector.json
 
 
-*datagen source connector*
+**datagen source connector**
+
 datagen_source_connector.json
 
 
