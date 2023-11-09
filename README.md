@@ -15,13 +15,14 @@ JDBC source/sink connector を利用してMS SQL ServerのMemory-Optimizaed Tabl
 ### 利用コンテナイメージ:
 
 confluent cp 7.4.0
-	broker (confluent server)
-	zookeeper
-	schemaregistry
-	ksqldb
-	control-center
-	rest-proxy
-	connect -> based on cp 7.4.0 but included some connectors like jdbc connectors.
+
+	-  broker (confluent server)
+	-  zookeeper
+	-  schemaregistry
+	-  ksqldb
+	-  control-center
+	-  rest-proxy
+	-  connect -> based on cp 7.4.0 but included some connectors like jdbc connectors.
 
 
 #### connect docker imageの作成
