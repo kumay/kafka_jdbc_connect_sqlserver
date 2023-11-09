@@ -139,6 +139,8 @@ GO
 
 ### Errors (エラー)
 
+Without `MEMORY_OPTIMIZED_ELEVATE_TO_SNAPSHOT = ON` following error occurs.
+
 Following setting cause SQL error.
 ```
 "mode": "incrementing",
