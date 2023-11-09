@@ -2,6 +2,7 @@
 
 ## 目的：
 JDBC source/sink connector を利用してMS SQL ServerのMemory-Optimizaed Tableへデータの入出力を行う。
+
 操作はなるべくGUIで行った。（dockerの操作だけコマンドライン）
 
 ## 必要なアプリケーション
@@ -122,12 +123,14 @@ GO
 #### JDBC sink connector
 
 We can store data to memory_optimized table
+
 Sink connectorでは特に設定は必要でなかった
 
 
 #### JDBC source connector
 
 Source connector ではSQL serverに作ったDBに設定の変更を行う必要がある。
+
 *We need following setting enebaled in DB of where Table exists.*
 
 ```
