@@ -1,0 +1,318 @@
+version: "3.5"
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0-1-ubi8
+    restart: always
+    hostname: zookeeper
+    container_name: zookeeper
+    networks:
+      - confluent
+    ports:
+      - 2181:2181
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  broker-1:
+    image: confluentinc/cp-server:7.4.0-1-ubi8
+    container_name: broker-1
+    hostname: broker-1
+    ports:
+      - "19092:19092"
+      - "11109:11109"     
+    networks:
+      - confluent
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 101
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_ENABLE: "false"
+      KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      KAFKA_LISTENERS: DOCKER://broker-1:9092,HOST://broker-1:19092
+      KAFKA_ADVERTISED_LISTENERS: DOCKER://broker-1:9092,HOST://broker-1:19092
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker-1:9092,broker-2:9092,broker-3:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER:PLAINTEXT,HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+      # Schema Validation
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      KAFKA_CONFLUENT_HTTP_SERVER_LISTENERS: http://broker-1:18090
+      KAFKA_JMX_PORT: 11109
+      KAFKA_JMX_HOSTNAME: broker-1
+      # KAFKA_LOG4J_LOGGERS: "kafka.network.Processor=DEBUG,kafka.request.logger=DEBUG"
+      # KAFKA_LOG4J_LOGGERS: "kafka.request.logger=DEBUG"
+      
+  broker-2:
+    image: confluentinc/cp-server:7.4.0-1-ubi8
+    container_name: broker-2
+    hostname: broker-2
+    ports:
+      - "29092:29092"
+      - "21109:21109"
+    networks:
+      - confluent
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 102
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_ENABLE: "false"
+      KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      KAFKA_LISTENERS: DOCKER://broker-2:9092,HOST://broker-2:29092
+      KAFKA_ADVERTISED_LISTENERS: DOCKER://broker-2:9092,HOST://broker-2:29092
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker-1:9092,broker-2:9092,broker-3:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER:PLAINTEXT,HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+      # Schema Validation
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      KAFKA_CONFLUENT_HTTP_SERVER_LISTENERS: http://broker-2:28090
+      KAFKA_JMX_PORT: 21109
+      KAFKA_JMX_HOSTNAME: broker-2
+      # KAFKA_LOG4J_LOGGERS: "kafka.network.Processor=DEBUG,kafka.request.logger=DEBUG"
+      # KAFKA_LOG4J_LOGGERS: "kafka.request.logger=DEBUG"
+
+  broker-3:
+    image: confluentinc/cp-server:7.4.0-1-ubi8
+    container_name: broker-3
+    hostname: broker-3
+    ports:
+      - "39092:39092"
+      - "31109:31109"
+    networks:
+      - confluent
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 103
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_ENABLE: "false"
+      KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      KAFKA_LISTENERS: DOCKER://broker-3:9092,HOST://broker-3:39092
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker-1:9092,broker-2:9092,broker-3:9092
+      KAFKA_ADVERTISED_LISTENERS: DOCKER://broker-3:9092,HOST://broker-3:39092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER:PLAINTEXT,HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+      # Schema Validation
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      KAFKA_CONFLUENT_HTTP_SERVER_LISTENERS: http://broker-3:38090
+      KAFKA_JMX_PORT: 31109
+      KAFKA_JMX_HOSTNAME: broker-3
+      # KAFKA_LOG4J_LOGGERS: "kafka.network.Processor=DEBUG,kafka.request.logger=DEBUG"
+      # KAFKA_LOG4J_LOGGERS: "kafka.request.logger=DEBUG"
+
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:7.4.0-1-ubi8
+    hostname: control-center
+    container_name: control-center
+    depends_on:
+      - broker-1
+      - broker-2
+      - broker-3
+      - schema-registry
+      - ksqldb-server
+      - connect
+    networks:
+      - confluent
+    ports:
+      - 9021:9021
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: "broker-1:9092,broker-2:9092,broker-3:9092"
+      CONTROL_CENTER_KAFKA_CONTROLCENTER_BOOTSTRAP_SERVERS: "broker-1:9092,broker-2:9092,broker-3:9092"
+      CONTROL_CENTER_KAFKA_PRODUCTION_BOOTSTRAP_SERVERS: "broker-1:9092,broker-2:9092,broker-3:9092"
+      CONTROL_CENTER_KAFKA_PRODUCTION_CPREST_URL: http://broker-1:18090
+      CONTROL_CENTER_ZOOKEEPER_CONNECT: zookeeper:2181
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_UI_AUTOUPDATE_ENABLE: "false"
+      CONTROL_CENTER_CONNECT_CONNECT-DEFAULT_CLUSTER: "connect:8083"
+      CONTROL_CENTER_KSQL_KSQLDB1_URL: "http://ksqldb-server:8088"
+      CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: "http://127.0.0.1:8088"
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_REPLICATION: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_REPLICATION: 1
+      CONTROL_CENTER_COMMAND_TOPIC_REPLICATION: 1
+      CONTROL_CENTER_METRICS_TOPIC_REPLICATION: 1
+      CONTROL_CENTER_STREAMS_NUM_STREAM_THREADS: 1
+      # Amount of heap to use for internal caches. Increase for better throughput
+      CONTROL_CENTER_STREAMS_CACHE_MAX_BYTES_BUFFERING: 100000000
+      CONTROL_CENTER_STREAMS_CONSUMER_REQUEST_TIMEOUT_MS: "960032"
+
+  schema-registry:
+    image: "confluentinc/cp-schema-registry:7.4.0-1-ubi8"
+    restart: always
+    hostname: schema-registry
+    container_name: schema-registry
+    depends_on:
+      - broker-1
+      - broker-2
+      - broker-3
+    networks:
+      - confluent
+    ports:
+      - 8081:8081
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: broker-1:9092,broker-2:9092,broker-3:9092
+      KAFKA_REST_CUB_KAFKA_TIMEOUT: 180 # https://github.com/confluentinc/cp-docker-images/issues/807
+
+  ksqldb-server:
+    image: confluentinc/cp-ksqldb-server:7.4.0-1-ubi8
+    restart: always
+    hostname: ksqldb-server
+    container_name: ksqldb-server
+    depends_on:
+      - broker-1
+      - broker-2
+      - broker-3
+      - schema-registry
+      - connect
+    ports:
+      - 8088:8088
+    networks:
+      - confluent
+    environment:
+      KSQL_CONFIG_DIR: "/etc/ksql"
+      KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksqldb/log4j-rolling.properties"
+      KSQL_BOOTSTRAP_SERVERS: broker-1:9092,broker-2:9092,broker-3:9092
+      KSQL_HOST_NAME: ksqldb-server
+      KSQL_APPLICATION_ID: "etl-demo"
+      KSQL_LISTENERS: "http://0.0.0.0:8088"
+      # Set the buffer cache to 0 so that the KSQL CLI shows all updates to KTables for learning purposes.
+      # The default is 10 MB, which means records in a KTable are compacted before showing output.
+      # Change cache.max.bytes.buffering and commit.interval.ms to tune this behavior.
+      KSQL_CACHE_MAX_BYTES_BUFFERING: 0
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
+      KSQL_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_BOOTSTRAP_SERVERS: broker-1:9092,broker-2:9092,broker-3:9092
+      KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+      KSQL_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_BOOTSTRAP_SERVERS: broker-1:9092,broker-2:9092,broker-3:9092
+
+  restproxy:
+    image: confluentinc/cp-kafka-rest:7.4.0-1-ubi8
+    hostname: restproxy
+    container_name: restproxy
+    restart: always
+    depends_on:
+      - broker-1
+      - broker-2
+      - broker-3
+      - schema-registry
+      - connect
+    volumes:
+      - /home/training/sr/restproxy-creds:/etc/restproxy/secrets
+    ports:
+      - 8082:8082
+    networks:
+      - confluent
+    environment:
+      KAFKA_REST_HOST_NAME: restproxy
+      KAFKA_REST_BOOTSTRAP_SERVERS: PLAINTEXT://broker:9092,PLAINTEXT://broker-2:9092,PLAINTEXT://broker-3:9092
+      KAFKA_REST_LISTENERS: http://0.0.0.0:8082
+      KAFKA_REST_ADVERTISED_LISTENERS: http://restproxy:8082
+      KAFKA_REST_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+
+  connect:
+    image: connect:0.1.0
+    restart: always
+    build: connect
+    container_name: connect
+    hostname: connect
+    depends_on:
+      - broker-1
+      - broker-2
+      - broker-3
+      - schema-registry
+    ports:
+      - "8083:8083"
+      - "51109:51109"
+    networks:
+      - confluent
+    environment:
+      CONNECT_REST_PORT: 8083
+      CONNECT_BOOTSTRAP_SERVERS: broker-1:9092,broker-2:9092,broker-3:9092
+      CONNECT_GROUP_ID: "connect"
+      CONNECT_CONFIG_STORAGE_TOPIC: "connect-config"
+      CONNECT_OFFSET_STORAGE_TOPIC: "connect-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "connect-status"
+      CONNECT_REPLICATION_FACTOR: 1
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "io.confluent.connect.avro.AvroConverter"
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_PLUGIN_PATH: '/usr/share/java,/usr/share/confluent-hub-components/,/data/connect-jars'
+      CONNECT_REST_ADVERTISED_HOST_NAME: "connect"
+      CONNECT_PRODUCER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
+      CONNECT_CONSUMER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
+      KAFKA_JMX_PORT: 51109
+      KAFKA_JMX_HOSTNAME: connect
+      CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect=INFO"
+
+  mysql:
+    image: mysql:5.7.42-oracle
+    restart: always
+    container_name: mysql
+    hostname: mysql
+    networks:
+      - confluent
+    depends_on:
+      - connect
+    ports:
+      - "3306:3306"
+    # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
+    # (this is just an example, not intended to be a production configuration)
+    # command: --default-authentication-plugin=mysql
+    
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_DATABASE: connector
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: always
+    container_name: mssql
+    hostname: mssql
+    networks:
+      - confluent
+    depends_on:
+      - connect
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: saPassw0rd!
+
+  # kafka-lag-exporter:
+  #   image: seglo/kafka-lag-exporter:latest
+  #   restart: always
+  #   container_name: kafka-lag-exporter
+  #   hostname: kafka-lag-exporter
+  #   networks:
+  #     - confluent
+  #   depends_on:
+  #     - broker-1
+  #     - broker-2
+  #     - broker-3
+  #     - connect
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ./kafka-lag-exporter:/opt/docker/conf/
+  #   environment:
+  #     - JAVA_OPTS=-Dconfig.file=/opt/docker/conf/application.conf -Dlogback.configurationFile=/opt/docker/conf/logback.xml
+
+networks:
+  confluent:

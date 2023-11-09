@@ -1,0 +1,17 @@
+{
+  "name": "mssql-to-users",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "tasks.max": "1",
+    "connection.url": "jdbc:sqlserver://mssql:1433;databaseName=mydb;encrypt=false;",
+    "connection.user": "sa",
+    "connection.password": "saPassw0rd!",
+    "table.whitelist": "users",
+    "mode": "timestamp",
+    "timestamp.column.name": "registertime",
+    "topic.prefix": "sqlserver-",
+    "validate.non.null":"false",
+    "errors.log.enable": "true",
+    "errors.log.include.messages": "true"
+  }
+}
