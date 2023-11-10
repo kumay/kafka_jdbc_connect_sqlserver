@@ -21,3 +21,11 @@ Use Temporal Table for CDC source.
 https://learn.microsoft.com/en-us/sql/relational-databases/tables/system-versioned-temporal-tables-with-memory-optimized-tables?view=sql-server-ver16&redirectedfrom=MSDN
 
 
+Enabling CDC for Azure SQl
+
+https://learn.microsoft.com/en-us/samples/azure-samples/azure-sql-db-change-stream-debezium/azure-sql%2D%2Dsql-server-change-stream-with-debezium/
+
+
+
+Debizium - set up SQL server for CDC
+https://debezium.io/documentation/reference/2.4/connectors/sqlserver.html#setting-up-sqlserver
