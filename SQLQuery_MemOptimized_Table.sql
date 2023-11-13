@@ -23,6 +23,7 @@ CREATE TABLE users
 ) WITH (MEMORY_OPTIMIZED = ON, DURABILITY = SCHEMA_AND_DATA);
 GO
 
+-- Need this for JDBC Source connector to work --
 ALTER DATABASE CURRENT 
 SET MEMORY_OPTIMIZED_ELEVATE_TO_SNAPSHOT = ON
 GO
@@ -31,6 +32,7 @@ SELECT * FROM dbo.users;
 GO
 
 -- for CDC preparation --
+-- Experimental 
 
 ALTER TABLE users
   add
@@ -43,6 +45,5 @@ ALTER TABLE users
 SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.[users_History]))
 GO
 
-SELECT * FROM dbo.users_History;
+SELECT * FROM dbo.users;
 GO
-
